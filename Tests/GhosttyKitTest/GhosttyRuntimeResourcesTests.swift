@@ -57,6 +57,43 @@ struct GhosttyRuntimeResourcesTests {
         ])
     }
 
+    @Test(arguments: [
+        (features: "cursor", expected: "\u{1B}[1 q\u{1B}[5 q"),
+        (features: "cursor:steady", expected: "\u{1B}[2 q\u{1B}[6 q"),
+    ])
+    func `zsh vi keymaps select block and bar cursors`(
+        features: String,
+        expected: String
+    ) throws {
+        let resources = try #require(GhosttyRuntimeResources.directoryURL)
+        let integration = resources
+            .appendingPathComponent("shell-integration/zsh/ghostty-integration")
+
+        let output = Pipe()
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/bin/zsh")
+        process.arguments = [
+            "-dfi",
+            "-c",
+            "source \"$GHOSTTY_INTEGRATION_PATH\"; "
+                + "KEYMAP=vicmd; _ghostty_zle_cursor_shape; "
+                + "KEYMAP=viins; _ghostty_zle_cursor_shape",
+        ]
+        process.environment = [
+            "GHOSTTY_INTEGRATION_PATH": integration.path,
+            "GHOSTTY_SHELL_FEATURES": features,
+        ]
+        process.standardOutput = output
+        process.standardError = FileHandle.nullDevice
+
+        try process.run()
+        process.waitUntilExit()
+
+        #expect(process.terminationStatus == 0)
+        let data = try output.fileHandleForReading.readToEnd() ?? Data()
+        #expect(String(decoding: data, as: UTF8.self) == expected)
+    }
+
     @Test
     func `configuration exports Ghostty resource root`() throws {
         let previous = getenv("GHOSTTY_RESOURCES_DIR").map { String(cString: $0) }

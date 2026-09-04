@@ -14,8 +14,9 @@
 #   OSC 7                   the working directory, as a file:// URL
 #   OSC 2                   the title — the directory at a prompt, the
 #                           command while it runs (feature `title`)
-#   DECSCUSR                a bar cursor while editing, the default shape
-#                           while a command runs (feature `cursor`)
+#   DECSCUSR                a bar cursor in insert mode, a block cursor in
+#                           command/visual mode, and the default shape while a
+#                           command runs (feature `cursor`)
 #
 # Features come from GHOSTTY_SHELL_FEATURES, a comma-separated list the
 # terminal exports (`cursor`, `cursor:blink`, `cursor:steady`, `title`, …).
@@ -29,7 +30,7 @@
 (( ${+_ghostty_integration_loaded} )) && return 0
 typeset -g _ghostty_integration_loaded=1
 
-builtin autoload -Uz add-zsh-hook
+builtin autoload -Uz add-zsh-hook add-zle-hook-widget
 
 typeset -g _ghostty_prompt_end=$'%{\e]133;B\a%}'
 typeset -g _ghostty_command_ran=0
@@ -80,6 +81,16 @@ _ghostty_precmd() {
     fi
 }
 
+_ghostty_zle_cursor_shape() {
+    local steady=0
+    _ghostty_feature cursor:steady && steady=1
+
+    case ${KEYMAP-} in
+        vicmd|visual) builtin print -n -- "\e[$((1 + steady)) q" ;;
+        *)            builtin print -n -- "\e[$((5 + steady)) q" ;;
+    esac
+}
+
 _ghostty_preexec() {
     _ghostty_command_ran=1
 
@@ -98,3 +109,8 @@ _ghostty_preexec() {
 
 add-zsh-hook precmd _ghostty_precmd
 add-zsh-hook preexec _ghostty_preexec
+
+if _ghostty_feature cursor || _ghostty_feature cursor:blink || _ghostty_feature cursor:steady; then
+    add-zle-hook-widget line-init _ghostty_zle_cursor_shape
+    add-zle-hook-widget keymap-select _ghostty_zle_cursor_shape
+fi
