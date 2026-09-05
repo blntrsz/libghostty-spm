@@ -24,6 +24,9 @@ public final class TerminalViewState: ObservableObject {
 
     @Published public internal(set) var workingDirectory: String?
 
+    /// The hyperlink currently under the pointer, or nil when no link is hovered.
+    @Published public internal(set) var hoveredLink: String?
+
     @Published public internal(set) var lastCommandExitCode: Int?
     @Published public internal(set) var lastCommandDurationNanos: UInt64?
 

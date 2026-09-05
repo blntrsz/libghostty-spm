@@ -15,6 +15,7 @@ extension TerminalViewState:
     TerminalSurfaceCloseDelegate,
     TerminalSurfaceBellDelegate,
     TerminalSurfaceDesktopNotificationDelegate,
+    TerminalSurfaceHoverLinkDelegate,
     TerminalSurfacePwdDelegate,
     TerminalSurfaceScrollbarDelegate,
     TerminalSurfaceCommandFinishedDelegate,
@@ -100,6 +101,13 @@ extension TerminalViewState:
             $0.lastDesktopNotificationTitle = title
             $0.lastDesktopNotificationBody = body
             $0.lastDesktopNotificationAt = at
+        }
+    }
+
+    public func terminalDidUpdateHoverLink(_ url: String?) {
+        publishSoon {
+            guard $0.hoveredLink != url else { return }
+            $0.hoveredLink = url
         }
     }
 

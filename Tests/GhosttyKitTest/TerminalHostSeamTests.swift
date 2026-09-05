@@ -1,4 +1,5 @@
 import Foundation
+import GhosttyKit
 @testable import GhosttyTerminal
 import Testing
 
@@ -13,6 +14,30 @@ struct TerminalHostSeamTests {
     func `platform view factory defaults to the base class`() {
         let state = TerminalViewState()
         #expect(state.makePlatformView == nil)
+    }
+
+    @Test
+    func `open URL kind preserves OSC 8 origin`() {
+        let kind = TerminalOpenURLKind(GHOSTTY_ACTION_OPEN_URL_KIND_OSC8)
+        if case .osc8 = kind {
+            // Expected.
+        } else {
+            Issue.record("OSC 8 URL origin was erased")
+        }
+    }
+
+    @Test
+    @MainActor
+    func `hovered link is published and cleared`() async {
+        let state = TerminalViewState()
+
+        state.terminalDidUpdateHoverLink("https://example.com/very/long/path")
+        await nextMainQueueTurn()
+        #expect(state.hoveredLink == "https://example.com/very/long/path")
+
+        state.terminalDidUpdateHoverLink(nil)
+        await nextMainQueueTurn()
+        #expect(state.hoveredLink == nil)
     }
 
     @Test
