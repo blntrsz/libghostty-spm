@@ -34,6 +34,10 @@ public final class TerminalViewState: ObservableObject {
     /// update). Drives a host-drawn scrollbar.
     @Published public internal(set) var scrollbar: TerminalScrollbar?
 
+    /// Renderer-local search results. The selected index is zero-based.
+    @Published public internal(set) var searchMatchCount: UInt?
+    @Published public internal(set) var selectedSearchMatchIndex: UInt?
+
     public internal(set) weak var surface: TerminalSurface?
 
     /// The platform view currently presenting this state, set by the SwiftUI
@@ -91,6 +95,11 @@ public final class TerminalViewState: ObservableObject {
     /// a paste the user started is allowed; a host that wants programs to
     /// read the clipboard, or wants a say on unsafe pastes, sets it.
     public var onClipboardConfirmationRequest: ((TerminalClipboardConfirmationRequest) -> Void)?
+
+    /// Host hooks for presenting and dismissing renderer-local search UI.
+    /// A nil query asks the host to use its current query or the find pasteboard.
+    public var onSearchRequest: ((String?) -> Void)?
+    public var onSearchEndRequest: (() -> Void)?
 
     /// Hands keyboard focus to the attached terminal view, imperatively.
     ///

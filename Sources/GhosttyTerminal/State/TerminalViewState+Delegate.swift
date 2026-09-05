@@ -18,6 +18,7 @@ extension TerminalViewState:
     TerminalSurfaceHoverLinkDelegate,
     TerminalSurfacePwdDelegate,
     TerminalSurfaceScrollbarDelegate,
+    TerminalSurfaceSearchDelegate,
     TerminalSurfaceCommandFinishedDelegate,
     TerminalSurfaceLifecycleDelegate,
     TerminalSurfaceTextSelectionRequestDelegate,
@@ -122,6 +123,28 @@ extension TerminalViewState:
         publishSoon {
             guard $0.scrollbar != scrollbar else { return }
             $0.scrollbar = scrollbar
+        }
+    }
+
+    public func terminalDidRequestSearch(query: String?) {
+        onSearchRequest?(query)
+    }
+
+    public func terminalDidRequestEndSearch() {
+        onSearchEndRequest?()
+    }
+
+    public func terminalDidUpdateSearchMatchCount(_ count: UInt?) {
+        publishSoon {
+            guard $0.searchMatchCount != count else { return }
+            $0.searchMatchCount = count
+        }
+    }
+
+    public func terminalDidSelectSearchMatch(at index: UInt?) {
+        publishSoon {
+            guard $0.selectedSearchMatchIndex != index else { return }
+            $0.selectedSearchMatchIndex = index
         }
     }
 

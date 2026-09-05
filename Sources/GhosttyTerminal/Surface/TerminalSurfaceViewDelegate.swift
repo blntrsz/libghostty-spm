@@ -232,6 +232,16 @@ public protocol TerminalSurfaceScrollbarDelegate: TerminalSurfaceViewDelegate {
     func terminalDidUpdateScrollbar(_ scrollbar: TerminalScrollbar)
 }
 
+/// Search UI and result updates emitted by Ghostty's renderer-local search.
+/// Match indices are zero-based; nil represents Ghostty's `-1` sentinel.
+@MainActor
+public protocol TerminalSurfaceSearchDelegate: TerminalSurfaceViewDelegate {
+    func terminalDidRequestSearch(query: String?)
+    func terminalDidRequestEndSearch()
+    func terminalDidUpdateSearchMatchCount(_ count: UInt?)
+    func terminalDidSelectSearchMatch(at index: UInt?)
+}
+
 /// User long-pressed to request a selection-page presentation.
 public struct TerminalTextSelectionRequest: Sendable {
     /// Viewport text snapshot. Lines separated by `\n`.
